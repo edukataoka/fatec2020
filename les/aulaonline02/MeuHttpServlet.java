@@ -24,11 +24,18 @@ public class MeuHttpServlet extends HttpServlet {
 
 	public void processa(HttpServletRequest req, HttpServletResponse res) throws IOException {
 		PrintWriter out = res.getWriter();
-		out.println("<h1>Você acessou este servlet via GET</h1>");
+		out.println("<h1>VocÃª acessou este servlet via GET</h1>");
 
 
 		String ua = req.getHeader("user-agent");
-		out.println("Você está acessando de um: " + ua);
+		out.println("VocÃª estÃ¡ acessando de um: " + ua);
+		
+			Enumeration<String> headers = req.getHeaderNames();
+		while (headers.hasMoreElements()) {
+			String headerName = headers.nextElement();
+			out.print("<p>CabeÃ§alho: (" + headerName);
+			out.print(")Valor: " + req.getHeader(headerName) + "</p>");
+
 	}
 
 }
