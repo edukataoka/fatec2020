@@ -1,6 +1,6 @@
-CREATE DATABASE dudu_cursor
+CREATE DATABASE cursor_dudu
 GO
-USE dudu_cursor
+USE cursor_dudu
 
 CREATE TABLE curso(
 codigo_curso  INT NOT NULL PRIMARY KEY,
