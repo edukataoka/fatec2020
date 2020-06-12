@@ -1,0 +1,99 @@
+CREATE DATABASE dudu_cursor
+GO
+USE dudu_cursor
+
+CREATE TABLE curso(
+codigo_curso  INT NOT NULL PRIMARY KEY,
+nome_curso    VARCHAR(150) NOT NULL,
+duracao INT 
+)
+
+CREATE TABLE disciplinas(
+codigo_disciplina INT NOT NULL PRIMARY KEY,
+nome_disciplina VARCHAR(150) NOT NULL,
+carga_horaria INT
+)
+
+CREATE TABLE disciplina_curso(
+codigo_disciplina INT,
+codigo_curso INT,
+PRIMARY KEY(codigo_disciplina,codigo_curso),
+FOREIGN KEY(codigo_disciplina) REFERENCES disciplinas(codigo_disciplina),
+FOREIGN KEY(codigo_curso) REFERENCES curso(codigo_curso)
+)
+
+INSERT INTO curso VALUES
+(0,'Análisa e Desenvolvimento de Sistemas',2880),
+(1,'Logistica',2880),
+(2,'Polímeros',2880),
+(3,'Comércio Exterior',2600),
+(4,'Gestão Empresarial',2600)
+
+INSERT INTO disciplinas VALUES
+(1,'Algoritmos', 80),
+(2,'Administração', 80),
+(3,'Laboratório de Hardware',40),
+(4,'Pesquisa Operacional',80),
+(5,'Física I',80),
+(6,'Físico Química',80),
+(7,'Comércio Exterior',80),
+(8,'Fundamentos de Marketing',80),
+(9,'Informática',40),
+(10,'Sistemas de Informação',80)
+
+INSERT INTO disciplina_curso VALUES
+(1,0),(2,0),(2,1),(2,3),(2,4),(3,0),(4,1),(5,2),(6,2),(7,1),(7,3),(8,1),
+(8,4),(9,1),(9,3),(10,0),(10,4)
+
+
+CREATE FUNCTION fn_dudu_disciplinas_do_curso(@codigo_curso INT)
+RETURNS @tabela TABLE(
+codigo_disciplina        INT,
+nome_disciplina          VARCHAR(150),
+carga_horaria_disciplina INT,
+nome_curso               VARCHAR(150))
+AS
+BEGIN
+	DECLARE 
+           @codigo_disciplina  INT,
+           @nome_disciplina    VARCHAR(150),
+           @carga_horaria      INT,
+	   @nome_curso         VARCHAR(150)
+
+	SET @nome_curso = (SELECT nome_curso FROM curso WHERE codigo_curso = @codigo_curso)
+
+    --Criar cursor
+    DECLARE cursor_busca CURSOR FOR
+        SELECT codigo_disciplina FROM disciplina_curso WHERE codigo_curso = @codigo_curso  
+
+    --Abrir cursor
+    OPEN cursor_busca
+
+    --Posicionar no primeiro registro
+    FETCH NEXT FROM cursor_busca INTO @codigo_disciplina
+
+    --Verificar se houve registro
+	WHILE @@FETCH_STATUS = 0
+    BEGIN
+
+		SELECT @nome_disciplina = nome_disciplina, @carga_horaria = carga_horaria
+		FROM disciplinas WHERE codigo_disciplina = @codigo_disciplina
+	
+
+		INSERT INTO @tabela VALUES
+			(@codigo_disciplina, @nome_disciplina, @carga_horaria,@nome_curso)
+		
+		--Posicionar no próximo registro
+        FETCH NEXT FROM cursor_busca INTO @codigo_disciplina
+	END
+
+	CLOSE cursor_busca
+    DEALLOCATE cursor_busca
+ 
+    RETURN
+END
+select * from fn_dudu_disciplinas_do_curso(0)
+select * from fn_dudu_disciplinas_do_curso(1)
+select * from fn_dudu_disciplinas_do_curso(2)
+select * from fn_dudu_disciplinas_do_curso(3)
+select * from fn_dudu_disciplinas_do_curso(4)
